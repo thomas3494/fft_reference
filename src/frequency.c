@@ -9,7 +9,7 @@
  *  t = 0, h, 2h, ..., (n - 1) h
  * 
  * S(f) = \sum_k s(h * k) e^{2pi i f (h * k)} * h
- *      = \sum_k X[k] e^{2pi i f k / n} / n
+ *      = \sum_k X[k] e^{(2pi i / n) * f * k} / n
  *
  * Discretizing on general intervals [a, b) gives different exponents, but this
  * is unnecessary. We can transform t -> s(t) to t -> s((t - a) / (b - a))
@@ -24,11 +24,9 @@
 #include <fftw3.h>
 #include <time.h>
 
-bool prob_zero(double complex x, double eps)
+bool prob_zero(double complex z, double eps)
 {
-    double r = creal(x);
-    double c = cimag(x);
-    return (fabs(r) < eps && fabs(c) < eps);
+    return (cabs(z) < eps);
 }
 
 double s(double x, int f)
@@ -70,11 +68,12 @@ int main(int argc, char **argv)
     fftw_execute(plan);
 
     for (int k = 0; k < n; k++) {
-        if (!prob_zero(S[k], 1e-10)) {
+        double complex ck = S[k] / n;
+        if (!prob_zero(ck, 1e-15)) {
             printf("Frequency %d: %e + %e i\n", 
                    k,
-                   creal(S[k]) / n,
-                   cimag(S[k]) / n);
+                   creal(ck),
+                   cimag(ck));
         }
     }
 
