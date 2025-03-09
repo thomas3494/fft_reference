@@ -11,6 +11,11 @@
  * S(f) = \sum_k s(h * k) e^{2pi i f (h * k)} * h
  *      = \sum_k X[k] e^{(2pi i / n) * f * k} / n
  *
+ * S(-f) = \sum_k X[k] e^{(2pi i / n) * -f * k} / n
+ *       = \sum_k X[k] e^{(2pi i / n) * -f * k + 2pi i * n / n} / n
+ *       = \sum_k X[k] e^{(2pi i / n) * (n - f) * k} / n
+ *       = S(n - f)
+ *
  * Discretizing on general intervals [a, b) gives different exponents, but this
  * is unnecessary. We can transform t -> s(t) to t -> s((t - a) / (b - a))
  * to get an interval [0, 2 pi), and then use time and frequency scaling.
@@ -33,12 +38,11 @@ double s(double x, int f)
 {
     /**
      * Frequency f and -f are 0.5i, -0.5i, the rest is 0 because
-     * 0.5i e^(-2 pi f x) + 0.5i e^(-2 pi(-f)x) = 
+     * 0.5i e^(-2 pi f x) - 0.5i e^(-2 pi(-f)x) = 
      * 0.5i (cos(-2pifx) + i sin(-2pifx)) - 0.5i (cos(2pifx) + i sin(2pifx))
-     * = 0.5 i^2 * 2 * - sin(2 pi f x) = sin(2pifx)
+     * = -0.5 i^2 * 2 * sin(2 pi f x) = sin(2pifx)
      *
-     * ?! I guess we get n - f because we discretize on [0, 2 pi) instead of
-     * [-pi, pi). What about the 2pi?
+     * Hm, what about the 2 pi?
      **/
     return sin(f * x);
 }
